@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart Campus — Floor Manager + Attendance</title>
+<meta name="description" content="Navigate your campus. Find your space. Move smarter.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#060b14;--g:rgba(14,24,42,.62);--bd:rgba(140,190,255,.16);--tx:#EAF1FA;--t2:#8FA3BD;--cy:#4FD8FF;--ok:#34d399;--no:#ef6a66;--wa:#f5b942;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;--sans:'Space Grotesk',Inter,system-ui,sans-serif;box-sizing:border-box}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 var(--sans);overflow:hidden}
+#c,#c canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+button,input{font:inherit;color:inherit}
+.g{position:fixed;background:var(--g);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--bd);border-radius:20px;box-shadow:0 12px 40px rgba(0,0,0,.4);padding:14px}
+.b{border:1px solid var(--bd);background:rgba(255,255,255,.04);border-radius:12px;padding:8px 14px;cursor:pointer;min-height:40px;transition:background .15s,transform .12s,border-color .15s;letter-spacing:.04em;font-size:12px;font-weight:500}
+.b:hover{background:rgba(79,216,255,.12);border-color:var(--cy)}.b:active{transform:scale(.96)}.b.p{background:var(--cy);color:#04121c;border-color:var(--cy);font-weight:700}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.m{font-family:var(--mono)}.t2{color:var(--t2)}.cap{font-size:11px;letter-spacing:.14em;color:var(--t2);text-transform:uppercase;margin:0 0 8px}
+#ld{position:fixed;inset:0;z-index:30;background:var(--bg);display:grid;place-content:center;justify-items:center;gap:18px;transition:opacity .5s}
+.wf{width:90px;height:90px;border:2px solid var(--cy);transform:rotateX(55deg) rotateZ(45deg);animation:wf 1.6s ease-in-out infinite;box-shadow:0 0 0 12px rgba(79,216,255,.1),0 0 0 26px rgba(79,216,255,.05)}@keyframes wf{50%{transform:rotateX(55deg) rotateZ(225deg);opacity:.4}}
+#hero{position:fixed;inset:0;z-index:5;display:grid;place-content:center;text-align:center;padding:24px;transition:opacity .6s;pointer-events:none}
+#hero>*{pointer-events:auto}#hero h1{font-size:clamp(44px,10vw,120px);line-height:.92;letter-spacing:-.04em;margin:0 0 18px;font-weight:700}#hero p{color:var(--t2);font-size:clamp(15px,2vw,20px);margin:0 0 28px}
+#hero .b{padding:14px 26px;margin:4px}
+#ui{transition:opacity .6s}
+header{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));left:16px;right:16px;display:flex;gap:14px;align-items:center;z-index:6;pointer-events:none}header>*{pointer-events:auto}
+.logo{font-weight:700;letter-spacing:.08em;font-size:12px;line-height:1.1;white-space:nowrap}
+#sw{position:relative;flex:0 1 460px}#q{width:100%;height:48px;border-radius:16px;border:1px solid var(--bd);background:var(--g);backdrop-filter:blur(18px);padding:0 18px;outline:0}#q:focus{border-color:var(--cy)}
+#sg{position:absolute;top:54px;left:0;right:0;padding:6px;display:none}#sg button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px;border-radius:12px;cursor:pointer}#sg button:hover,#sg button:focus{background:rgba(79,216,255,.12)}
+#lp{top:calc(84px + env(safe-area-inset-top,0px));left:16px;width:310px;max-height:calc(100% - 190px);overflow:auto;z-index:4}
+#rp{top:calc(84px + env(safe-area-inset-top,0px));right:88px;width:320px;z-index:4;animation:in .25s}@keyframes in{from{opacity:0;transform:translateY(8px) scale(.98)}}
+#fs{right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;padding:8px;z-index:4}
+#fs button{width:48px;height:44px;border-radius:12px;border:1px solid transparent;background:none;cursor:pointer;font-family:var(--mono);color:var(--t2)}#fs button.on{background:rgba(79,216,255,.16);border-color:var(--cy);color:var(--cy);box-shadow:0 0 18px rgba(79,216,255,.3)}
+#cc{right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;padding:8px;z-index:4}
+#bar{left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:18px;align-items:center;flex-wrap:wrap;z-index:4;max-width:calc(100% - 420px)}
+#cdn{font-size:26px;font-weight:600;letter-spacing:.04em}
+#nv{top:calc(84px + env(safe-area-inset-top,0px));left:340px;width:250px;z-index:4}
+.res{border-top:1px solid var(--bd);padding:10px 0}.res:first-child{border:0}
+.chip{display:inline-block;margin:0 4px 4px 0;padding:4px 8px;font-size:11px;border:1px solid var(--bd);border-radius:999px;background:none;cursor:pointer;font-family:var(--mono)}.chip:hover{border-color:var(--cy)}
+.st{font-weight:700;letter-spacing:.1em;font-size:12px}
+#tip{position:fixed;z-index:8;pointer-events:none;padding:10px 12px;border-radius:14px;background:rgba(6,11,20,.9);border:1px solid var(--bd);font-size:12px;display:none;max-width:230px}
+#toast{position:fixed;left:50%;top:calc(80px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:20;background:var(--g);backdrop-filter:blur(18px);border:1px solid var(--cy);border-radius:14px;padding:10px 16px;display:none}
+#fab{display:none}.sr{position:absolute;left:-9999px}
+input[type=time]{background:transparent;border:1px solid var(--bd);border-radius:10px;padding:4px 8px;color-scheme:dark}
+@media(max-width:860px){.logo{display:none}#lp{top:auto;left:8px;right:8px;width:auto;bottom:calc(150px + env(safe-area-inset-bottom,0px));max-height:42%;display:none}#lp.open{display:block}#rp{top:auto;left:8px;right:8px;width:auto;bottom:calc(150px + env(safe-area-inset-bottom,0px));border-radius:24px 24px 20px 20px}#nv{left:8px;top:calc(76px + env(safe-area-inset-top,0px))}#bar{left:8px;right:8px;max-width:none;bottom:calc(64px + env(safe-area-inset-bottom,0px))}#cc{right:8px;left:8px;justify-content:center;bottom:calc(8px + env(safe-area-inset-bottom,0px))}#fs{right:8px}#fs button{width:40px;height:38px}#fab{display:block;position:fixed;z-index:7;right:8px;top:calc(76px + env(safe-area-inset-top,0px))}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#att{top:calc(76px + env(safe-area-inset-top,0px));left:16px;right:16px;bottom:16px;z-index:9;padding:0;display:flex;flex-direction:column;overflow:hidden;background:rgba(6,11,20,.96)}#att[hidden]{display:none}#at{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--bd);overflow-x:auto;flex:none}#afr{flex:1;border:0;width:100%;background:#060b14}.b[aria-pressed=true]{background:rgba(79,216,255,.16);border-color:var(--cy);color:var(--cy)}
+</style></head><body>
+<div id="ld"><div class="wf"></div><div class="m t2" style="letter-spacing:.2em">BUILDING DIGITAL TWIN…</div></div>
+<div id="c" aria-label="3D floor map"></div>
+<section id="hero"><h1>SMART FLOOR<br>MANAGER</h1><p>Navigate your campus. Find your space. Move smarter.</p><div><button class="b p" id="ex">EXPLORE CAMPUS</button><button class="b" id="fr">FIND A ROOM</button><button class="b" id="ha">MY ATTENDANCE</button></div></section>
+<div id="ui" style="opacity:0;pointer-events:none">
+<header><div class="logo">SMART FLOOR<br>MANAGER</div><div id="sw"><input id="q" type="search" autocomplete="off" placeholder="Search rooms, labs, people or facilities..." aria-label="Search rooms"><div id="sg" class="g" role="listbox"></div></div><span style="flex:1"></span><button class="b" data-tab="map" aria-pressed="true">CAMPUS MAP</button><button class="b" data-tab="att" aria-pressed="false">ATTENDANCE</button><button class="b" data-t="n" aria-label="Notifications">🔔</button><button class="b" data-t="p" aria-label="Profile">◉</button><button class="b" data-t="s" aria-label="Settings">⚙</button></header>
+<button class="b" id="fab" aria-label="Open panel">AI</button>
+<aside id="lp" class="g" aria-label="Room finder">
+<p class="cap">AI Room Finder</p><input id="ai" class="m" style="width:100%;height:42px;border-radius:12px;border:1px solid var(--bd);background:rgba(255,255,255,.04);padding:0 12px;outline:0" placeholder="Free room for 30 students…" aria-label="Ask the room finder"><div id="air" style="margin-top:8px"></div>
+<p class="cap" style="margin-top:14px">You are here</p><div class="m">Floor 1 · Stairs landing</div>
+<p class="cap" style="margin-top:14px" id="dn">Today</p><div id="tdy"></div>
+<p class="cap" style="margin-top:14px">Rooms on this floor</p><div id="chips"></div>
+<div style="margin-top:12px"><button class="b" id="sq" style="width:100%">CALL THE SQUAD</button><div id="sqp"></div></div>
+</aside>
+<aside id="rp" class="g" hidden></aside><aside id="nv" class="g" hidden></aside>
+<nav id="fs" class="g" aria-label="Floors"></nav>
+<div id="cc" class="g" role="toolbar" aria-label="Camera"><button class="b" data-v="3d">3D</button><button class="b" data-v="2d">2D</button><button class="b" data-v="top">TOP VIEW</button><button class="b" data-z="-1" aria-label="Zoom in">+</button><button class="b" data-z="1" aria-label="Zoom out">−</button><button class="b" id="rs">RESET</button></div>
+<footer id="bar" class="g"><div><p class="cap" style="margin:0">Next class</p><b id="ncn">—</b><div class="t2 m" id="ncr"></div></div><div><p class="cap" style="margin:0">Starts in</p><div id="cdn" class="m">--:--:--</div></div><button class="b p" id="ncg">NAVIGATE</button><label class="t2 m" style="font-size:11px">Demo time <input type="time" id="sim" aria-label="Simulate time"></label><button class="b" id="live">LIVE</button></footer>
+</div>
+<div id="att" class="g" hidden><nav id="at" aria-label="Attendance sections"><button class="b" data-att="dashboard">DASHBOARD</button><button class="b" data-att="attendance">CALENDAR</button><button class="b" data-att="schedule">SCHEDULE</button><button class="b" data-att="subjects">SUBJECTS</button><button class="b" data-att="profile">PROFILE</button></nav><iframe id="afr" title="Attendance"></iframe></div>
+<div id="tip" role="status"></div><div id="toast" role="status"></div>
+<script src="attendance/timetable.js"></script>
+<script>
+const $=s=>document.querySelector(s),DAYN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],OPEN=480,CLOSE=1080;
+const f12=m=>{const h=Math.floor(m/60);return(h%12||12)+':'+String(m%60).padStart(2,'0')+' '+(h<12?'AM':'PM')};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let sim=null;const secs=()=>sim?sim.b+(Date.now()-sim.t)/1000:(n=>n.getHours()*3600+n.getMinutes()*60+n.getSeconds())(new Date()),MIN=()=>Math.floor(secs()/60),DAY=()=>sim?sim.d:new Date().getDay();
+// ===== DATA (SAMPLE: room registry + schedule are demo config; replace with your imported timetable) =====
+const TY=['class','class','class','lab','seminar','class','faculty','class','restroom','stairs'],TN={class:'Classroom',lab:'Programming Laboratory',seminar:'Seminar Hall',faculty:'Faculty Room',restroom:'Restrooms',stairs:'Stairs & Elevator'},CAP={class:60,lab:60,seminar:120,faculty:8};
+const FAC=['Dr. Kumar','Prof. Rao','Dr. Iyer'],SUBJ=['Data Structures','Computer Architecture','Mathematics','Operating Systems','Database Systems','Computer Networks','Machine Learning','Software Engineering'];
+const NF=7,REAL={'5:0':['518'],'5:1':['519'],'2:0':['211'],'2:1':['225'],'2:2':['227'],'4:0':['411'],'6:0':['625'],'1:3':['LAB-107'],'1:5':['LAB-108','lab'],'0:0':['TB-106']};
+let STU=[];const D3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],ST0=[540,590,650,700,750,800,850,910,960],SEC=()=>{try{return JSON.parse(localStorage.getItem('srm-att-prefs')).section}catch(e){return null}},
+rid=(sec,k)=>{const f=sec.subj[k][2],m=f.match(/^CDC\s*\/\s*(.+)$/),l=f.match(/^Lab slot,\s*(.+)$/);return m?m[1].trim():l?l[1].trim():sec.venue.replace(/^IST\s*/,'').replace(/\/.*$/,'').trim()};
+function blocks(sec,day){const o=[];sec.tt[day].forEach((k,i)=>{if(!k)return;const l=o[o.length-1];if(l&&l.k==k&&l.n==i-1){l.n=i;l.e=ST0[i]+50}else o.push({k,n:i,s:ST0[i],e:ST0[i]+50})});return o}
+const RS={};Object.values(SRM.SECTIONS).forEach(sec=>['Mon','Tue','Wed','Thu','Fri'].forEach((dn,di)=>blocks(sec,dn).forEach(b=>{const id=rid(sec,b.k),s=sec.subj[b.k];(RS[id]=RS[id]||[]).push({d:di+1,s:b.s,e:b.e,name:s[0],fac:s[2].split(/\s*[,\/]\s*/)[0]})})));
+function loadSTU(){const sec=SRM.SECTIONS[SEC()]||SRM.SECTIONS['III-ECE-A'],d=DAY();STU=d>0&&d<6?blocks(sec,D3[d]).map(b=>[b.s,sec.subj[b.k][0],rid(sec,b.k)]).filter(s=>byId(s[2])):[]}
+const ROOMS=[],SESS={};let kk=0;
+for(let f=0;f<NF;f++)for(let i=0;i<10;i++){const rl=REAL[f+':'+i]||[],ty=rl[1]||TY[i],id=rl[0]||(f||'G')+String(i+1).padStart(2,'0'),side=i<5?-1:1,r={id,f,i,ty,name:TN[ty],cap:CAP[ty]??null,x:-7.2+(i%5)*3.6,z:side*3.4,side,book:['class','lab','seminar'].includes(ty),maint:f==4&&i==2};ROOMS.push(r);
+ if(r.book){const a=SESS[id]=[],stu=STU.filter(s=>s[2]==id);if(stu.length){for(let d=1;d<6;d++)stu.forEach(s=>a.push({d,s:s[0],e:s[0]+60,name:s[1],fac:FAC[kk%3]}))}else for(let d=1;d<6;d++){if((kk+d)%5==0)continue;const s1=540+((kk+d)%3)*60,s2=780+((kk*2+d)%3)*60,L=ty=='lab'?120:60;a.push({d,s:s1,e:s1+L,name:SUBJ[(kk+d)%8],fac:FAC[kk%3]},{d,s:s2,e:s2+60,name:SUBJ[(kk+d+3)%8],fac:FAC[(kk+1)%3]})}kk++}}
+for(const id in RS)if(SESS[id])SESS[id]=RS[id];
+const byId=id=>ROOMS.find(r=>r.id==id),LB={av:'AVAILABLE',occ:'OCCUPIED',soon:'LIMITED',maint:'MAINTENANCE',closed:'CLOSED',na:'NO TIMETABLE'},SH={av:'AVL',occ:'OCC',soon:'SOON',maint:'MNT',closed:'CLS',na:''},CL={av:0x34d399,occ:0xd9534f,soon:0xf5b942,maint:0x7b8794,closed:0x4b5a6d,na:0x3a6a94};
+// ===== AVAILABILITY ENGINE (deterministic; AI never decides availability) =====
+function st(r,m=MIN(),d=DAY()){if(r.maint)return{k:'maint'};if(!r.book)return{k:'na'};if(d==0||m<OPEN||m>=CLOSE)return{k:'closed'};
+ const l=SESS[r.id].filter(x=>x.d==d).sort((a,b)=>a.s-b.s),cur=l.find(x=>x.s<=m&&m<x.e);
+ if(cur)return{k:'occ',cur,next:l.find(x=>x.s>=cur.e),until:cur.e};const nx=l.find(x=>x.s>m),u=nx?nx.s:CLOSE;return{k:u-m<=20?'soon':'av',next:nx,until:u}}
+const UP={x:7.6,z:0},UF=1,pts=r=>[[UP.x,0],[r.x,0],[r.x,r.side*1.1],[r.x,r.side*2.6]];
+const plen=p=>p.reduce((a,q,i)=>i?a+Math.hypot(q[0]-p[i-1][0],q[1]-p[i-1][1]):0,0),dist=r=>Math.round(plen(pts(r))*1.2+Math.abs(r.f-UF)*8);
+function ai(q){q=q.toLowerCase();let o={cap:null,f:null,dur:30},m=q.match(/(\d+)\s*(students|people|persons|seats)/);if(m)o.cap=+m[1];if(/ground/.test(q))o.f=0;else if(m=q.match(/floor\s*(\d)|(\d)(?:st|nd|rd|th)\s*floor/))o.f=+(m[1]||m[2]);
+ if(m=q.match(/(\d+)\s*(?:hours?|hrs?|h)\b/))o.dur=+m[1]*60;else if(m=q.match(/(\d+)\s*min/))o.dur=+m[1];const M0=MIN();
+ return ROOMS.filter(r=>r.book&&r.ty!='faculty'&&(o.cap==null||r.cap>=o.cap)&&(o.f==null||r.f==o.f)).map(r=>{const s=st(r,M0);let ok=false,wait=0;if(s.k=='av'||s.k=='soon')ok=s.until-M0>=o.dur;else if(s.k=='occ'&&s.until-M0<=15){ok=true;wait=s.until-M0}return{r,s,wait,ok,d:dist(r)}}).filter(x=>x.ok).sort((a,b)=>a.wait-b.wait||a.d-b.d).slice(0,3)}
+const nextCls=()=>{const d=DAY(),m=MIN();if(d<1||d>5)return null;const s=STU.find(x=>x[0]>m);return s&&{s:s[0],name:s[1],room:s[2]}};
+// ===== STATE / 3D =====
+let T,ren,sc,cam,G=[],RD=[],cur=1,sel=null,hov=null,mode='hero',flat=false,rt=null,squad=false,SQ=[],usr=[];
+const cs={az:-.6,el:.6,d:46,tx:0,tz:0},cg={az:-.6,el:.6,d:46,tx:0,tz:0},RED=matchMedia('(prefers-reduced-motion:reduce)').matches,H=1.5;
+function spr(lines,w,h,sz){const c=document.createElement('canvas');c.width=256;c.height=96;const t=new T.CanvasTexture(c),s=new T.Sprite(new T.SpriteMaterial({map:t,depthTest:false,transparent:true}));s.scale.set(w,h,1);s.userData={c,t};drw(s,lines);return s}
+function drw(s,l){const c=s.userData.c,x=c.getContext('2d');x.clearRect(0,0,256,96);x.textAlign='center';x.fillStyle='#EAF1FA';x.font='600 40px JetBrains Mono,monospace';x.fillText(l[0],128,44);x.fillStyle='#8FA3BD';x.font='500 24px JetBrains Mono,monospace';x.fillText(l[1]||'',128,80);s.userData.t.needsUpdate=true}
+function mkFloor(f){const g=new T.Group();g.userData={o:1,oT:1,y:0,yT:0};const M=(c,o)=>new T.MeshStandardMaterial({color:c,roughness:.8,transparent:true,opacity:o??1});
+ const slab=new T.Mesh(new T.BoxGeometry(22,.3,12.6),M(0x0b1626));slab.position.y=-.15;g.add(slab);const ed=new T.LineSegments(new T.EdgesGeometry(slab.geometry),new T.LineBasicMaterial({color:0x2a7fbf,transparent:true,opacity:.6}));ed.position.y=-.15;g.add(ed);
+ const cr=new T.Mesh(new T.BoxGeometry(21,.03,2.4),M(0x13233a));cr.position.y=.02;g.add(cr);const dk=[];
+ ROOMS.filter(r=>r.f==f).forEach(r=>{const geo=new T.BoxGeometry(3.3,H,4.1),mat=new T.MeshStandardMaterial({color:0x1b2d47,emissive:CL.na,emissiveIntensity:.15,transparent:true,opacity:.4,roughness:.4}),mesh=new T.Mesh(geo,mat);mesh.userData.r=r;g.add(mesh);
+  const edge=new T.LineSegments(new T.EdgesGeometry(geo),new T.LineBasicMaterial({color:0x4FD8FF,transparent:true,opacity:.35}));mesh.add(edge);const sp=spr([r.id,''],1.7,.64);sp.position.set(r.x,2.1,r.z);g.add(sp);
+  if(r.book&&r.ty!='faculty')for(let a=0;a<3;a++)for(let b=0;b<4;b++)dk.push([r.x-1.05+b*.7,r.z-.9+a*.8]);
+  if(r.ty=='stairs'){for(let s=0;s<5;s++){const b=new T.Mesh(new T.BoxGeometry(.6,.2*(s+1),2.6),M(0x6fa3d6));b.position.set(r.x-1.2+s*.5,.1*(s+1),r.z);g.add(b)}const lf=new T.Mesh(new T.BoxGeometry(.7,1.2,.9),M(0x9db4cc));lf.position.set(r.x+1.2,.6,r.z-1);g.add(lf)}
+  RD.push({r,mesh,mat,edge,sp,sy:0,lift:0})});
+ const im=new T.InstancedMesh(new T.BoxGeometry(.5,.08,.3),M(0x5a86b3),dk.length),o=new T.Object3D();dk.forEach((p,i)=>{o.position.set(p[0],.08,p[1]);o.updateMatrix();im.setMatrixAt(i,o.matrix)});g.add(im);
+ const ex=new T.Mesh(new T.BoxGeometry(.5,.5,.1),new T.MeshBasicMaterial({color:0x34d399}));ex.position.set(-10.8,.8,0);g.add(ex);const es=spr([f?'EXIT':'ENTRANCE','emergency'],1.8,.68);es.position.set(-10.8,1.7,0);g.add(es);
+ if(f==UF){const u=new T.Mesh(new T.SphereGeometry(.22,16,16),new T.MeshBasicMaterial({color:0x4FD8FF}));u.position.set(UP.x,.3,UP.z);g.add(u);const ring=new T.Mesh(new T.RingGeometry(.4,.5,32),new T.MeshBasicMaterial({color:0x4FD8FF,side:2,transparent:true,opacity:.6}));ring.rotation.x=-Math.PI/2;ring.position.set(UP.x,.05,UP.z);g.add(ring);usr=[ring]}
+ return g}
+const SQD=[{n:'BARATH',f:1,x:2,z:.4},{n:'ASHIKA',f:2,x:-.5,z:-.2},{n:'NIRANJANA',f:1,x:-6,z:.3}]; // demo positions
+function setO(g,o){g.traverse(c=>{if(c.material){const m=c.material,b=m.userData.b??(m.userData.b=m.opacity);m.transparent=true;m.opacity=b*o}});g.visible=o>.02}
+function layout(){G.forEach((g,f)=>{const u=g.userData;if(mode=='app'){u.yT=(f-cur)*7;u.oT=f==cur?1:0}else{u.yT=f*2.8-7;u.oT=mode=='hero'?.6:.75}})}
+function setView(v){flat=v=='2d';cg.el=v=='3d'?.78:1.5;cg.d=v=='3d'?24:20;document.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==v))}
+function boot(){T=THREE;const c=$('#c');ren=new T.WebGLRenderer({antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));c.appendChild(ren.domElement);sc=new T.Scene();sc.background=new T.Color(0x060b14);sc.fog=new T.Fog(0x060b14,45,110);cam=new T.PerspectiveCamera(40,1,.1,200);
+ sc.add(new T.HemisphereLight(0x9cc8ff,0x0a1220,.95));const dl=new T.DirectionalLight(0xffffff,.7);dl.position.set(8,18,10);sc.add(dl);const gr=new T.GridHelper(90,90,0x12324f,0x0c1c2f);gr.position.y=-9;sc.add(gr);
+ for(let f=0;f<NF;f++){const g=mkFloor(f);G.push(g);sc.add(g)}
+ SQD.forEach(p=>{const m=new T.Mesh(new T.SphereGeometry(.28,16,16),new T.MeshBasicMaterial({color:0xffffff}));m.position.set(p.x,.5,p.z);const s=spr([p.n,''],1.9,.7);s.position.set(p.x,1.4,p.z);m.visible=s.visible=false;G[p.f].add(m,s);SQ.push(m,s)});
+ layout();G.forEach(g=>{g.position.y=g.userData.yT;g.userData.y=g.userData.yT;setO(g,g.userData.oT);g.userData.o=g.userData.oT});
+ const cv=ren.domElement;let dr=null,mv=0;cv.style.touchAction='none';cv.oncontextmenu=e=>e.preventDefault();
+ cv.onpointerdown=e=>{dr={x:e.clientX,y:e.clientY,pan:e.button==2||e.shiftKey};mv=0;cv.setPointerCapture(e.pointerId)};
+ cv.onpointermove=e=>{if(dr&&mode!='hero'){const dx=e.clientX-dr.x,dy=e.clientY-dr.y;mv+=Math.abs(dx)+Math.abs(dy);if(dr.pan){const s=cg.d*.002;cg.tx=Math.max(-12,Math.min(12,cg.tx-dx*s*Math.cos(cs.az)-dy*s*Math.sin(cs.az)));cg.tz=Math.max(-8,Math.min(8,cg.tz+dx*s*Math.sin(cs.az)-dy*s*Math.cos(cs.az)))}else{cg.az-=dx*.007;cg.el=Math.max(.3,Math.min(1.55,cg.el+dy*.005))}dr={...dr,x:e.clientX,y:e.clientY}}else if(!dr)hover(e)};
+ cv.onpointerup=e=>{const was=mv<6;dr=null;if(was&&mode!='hero'){const p=pick(e);if(p)selectRoom(p.r)}};
+ cv.onwheel=e=>{e.preventDefault();cg.d=Math.max(6,Math.min(42,cg.d*(e.deltaY>0?1.08:.92)))};
+ addEventListener('resize',rz);rz();let last=performance.now();
+ (function fr(now){requestAnimationFrame(fr);const dt=Math.min(.05,(now-last)/1000);last=now,k=RED?1:1-Math.exp(-dt*7);
+  if(mode!='app'&&!RED)cg.az+=dt*.1;for(const p of['az','el','d','tx','tz'])cs[p]+=(cg[p]-cs[p])*k;if(mode!='app')cs.az=cg.az;
+  cam.position.set(cs.tx+cs.d*Math.cos(cs.el)*Math.sin(cs.az),cs.d*Math.sin(cs.el),cs.tz+cs.d*Math.cos(cs.el)*Math.cos(cs.az));cam.lookAt(cs.tx,0,cs.tz);
+  G.forEach(g=>{const u=g.userData;u.y+=(u.yT-u.y)*k;g.position.y=u.y;if(Math.abs(u.o-u.oT)>.004){u.o+=(u.oT-u.o)*k;setO(g,u.o)}});
+  RD.forEach(d=>{const on=d==hov,se=sel==d.r;d.sy+=((flat?.14:1)-d.sy)*k;d.lift+=((on?.35:0)-d.lift)*k;d.mesh.scale.y=d.sy;d.mesh.position.set(d.r.x,H*d.sy/2+d.lift,d.r.z);d.sp.position.y=H*d.sy+.6+d.lift;d.mat.emissiveIntensity=se?.9:on?.6:.15;d.edge.material.color.setHex(se?0x4FD8FF:0x3a6f9a);d.edge.material.opacity=se?1:.35});
+  usr.forEach(r=>{const s=1+.3*Math.sin(now/300);r.scale.set(s,s,1)});
+  if(rt){rt.p=Math.min(1,rt.p+dt*.7);const n=Math.floor(rt.p*rt.seg)*rt.rad*6;rt.mesh.geometry.setDrawRange(0,n);const q=rt.path.getPointAt(rt.p);rt.dot.position.copy(q);rt.dot.position.y=.3}
+  ren.render(sc,cam)})(last)}
+const rz=()=>{ren.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()};
+function pick(e){const r=ren.domElement.getBoundingClientRect(),rc=new T.Raycaster();rc.setFromCamera(new T.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),cam);const h=rc.intersectObjects(RD.filter(d=>d.r.f==cur||mode!='app').map(d=>d.mesh),false)[0];return h&&RD.find(d=>d.mesh==h.object)}
+function hover(e){if(mode=='hero')return;const p=pick(e),t=$('#tip');hov=p||null;if(!p){t.style.display='none';return}const r=p.r,s=st(r);t.style.display='block';t.style.left=Math.min(innerWidth-250,e.clientX+16)+'px';t.style.top=(e.clientY+16)+'px';
+ t.innerHTML=`<b class="m">ROOM ${r.id}</b> · ${esc(r.name)}<br><span class="st" style="color:#${CL[s.k].toString(16).padStart(6,'0')}">● ${LB[s.k]}</span><br><span class="t2">Now: ${s.cur?esc(s.cur.name):'—'}<br>Next: ${s.next?esc(s.next.name)+' '+f12(s.next.s):'—'}</span>`}
+// ===== ACTIONS =====
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.i);toast.i=setTimeout(()=>e.style.display='none',2600)}
+function setFloor(f){cur=f;mode='app';layout();clearRoute();sel=sel&&sel.f==f?sel:null;if(!sel)$('#rp').hidden=true;cg.tx=cg.tz=0;fsr();chips()}
+function selectRoom(r,nav){if(mode!='app'||cur!=r.f){cur=r.f;mode='app';layout();fsr();chips()}sel=r;cg.tx=r.x;cg.tz=r.z*.6;cg.d=Math.min(cg.d,14);if(view()=='top')setView('3d');panel();if(nav)startNav(r);else if(rt&&rt.r!=r)clearRoute()}
+const view=()=>flat?'2d':cg.el>1.2?'top':'3d';
+function panel(){const p=$('#rp');if(!sel){p.hidden=true;return}const r=sel,s=st(r),ok=s.k=='av'||s.k=='soon';p.hidden=false;
+ p.innerHTML=`<div style="display:flex;justify-content:space-between"><div><b class="m" style="font-size:22px">ROOM ${r.id}</b><div class="t2">${esc(r.name)}</div></div><button class="b" data-a="x" aria-label="Close">✕</button></div>
+ <p class="st" style="margin:12px 0;color:#${CL[s.k].toString(16).padStart(6,'0')}">● ${LB[s.k]}</p>
+ <div class="m" style="font-size:12px;line-height:1.9">Capacity: ${r.cap??'Not specified'}<br>Current class: ${s.cur?esc(s.cur.name)+' · '+esc(s.cur.fac):'None'}<br>Next class: ${s.next?esc(s.next.name)+' — '+f12(s.next.s):'None'}<br>${s.until!=null?(s.k=='occ'?'Available from: ':'Available until: ')+f12(s.until)+`<br><b id="rcd">--:--:--</b> <span class="t2" data-u="${s.until*60}">${s.k=='occ'?'until free':'remaining'}</span>`:''}</div>
+ <div style="display:flex;gap:6px;margin-top:14px;flex-wrap:wrap"><button class="b p" data-a="nav">NAVIGATE</button><button class="b" data-a="book">BOOK</button><button class="b" data-a="det">DETAILS</button></div><div id="det" class="m t2" style="font-size:12px;margin-top:10px"></div>`;tick()}
+function clearRoute(){if(rt){rt.mesh.parent.remove(rt.mesh,rt.dot);rt=null}$('#nv').hidden=true}
+function startNav(r){clearRoute();const P=pts(r),path=new T.CurvePath();for(let i=1;i<P.length;i++)path.add(new T.LineCurve3(new T.Vector3(P[i-1][0],.08,P[i-1][1]),new T.Vector3(P[i][0],.08,P[i][1])));
+ const seg=80,rad=6,mesh=new T.Mesh(new T.TubeGeometry(path,seg,.07,rad),new T.MeshBasicMaterial({color:0x4FD8FF})),dot=new T.Mesh(new T.SphereGeometry(.18,12,12),new T.MeshBasicMaterial({color:0xffffff}));G[r.f].add(mesh,dot);rt={mesh,dot,path,seg,rad,p:RED?1:0,r};
+ const m=dist(r),n=$('#nv');n.hidden=false;n.innerHTML=`<p class="cap">Navigation</p><div class="m">YOU ARE HERE<br>↓<br><b>ROOM ${r.id}</b></div><div class="m t2" style="margin:8px 0">${Math.max(1,Math.ceil(m/78))} min walk · ${m} m${r.f!=UF?`<br>Take stairs to floor ${r.f||'G'}`:''}</div><button class="b" data-a="cn">END ROUTE</button>`}
+const fsr=()=>{$('#fs').innerHTML=['ROOF',...Array.from({length:NF-1},(_,i)=>NF-1-i),'G'].map(f=>{const n=f=='G'?0:f,on=f=='ROOF'?mode=='stack':mode=='app'&&cur==n;return`<button class="${on?'on':''}" data-f="${f}" aria-pressed="${on}" aria-label="${f=='ROOF'?'Roof overview':'Floor '+f}">${f}</button>`}).join('')};
+const chips=()=>{$('#chips').innerHTML=ROOMS.filter(r=>r.f==cur).map(r=>`<button class="chip" data-r="${r.id}" aria-label="Room ${r.id} ${LB[st(r).k]}">${r.id} ${SH[st(r).k]}</button>`).join('')};
+function today(){const d=DAY();$('#dn').textContent=DAYN[d];$('#tdy').innerHTML=d>0&&d<6?STU.map(s=>`<button class="chip" style="display:block;width:100%;text-align:left;border-radius:10px;margin-bottom:4px" data-r="${s[2]}" data-n="1">${f12(s[0])} — ${s[1]} — ${s[2]}</button>`).join(''):'<span class="t2">No classes today.</span>'}
+function aiRun(q){const L=ai(q),e=$('#air');e.innerHTML=(L.length?`<p class="m" style="font-size:12px">${L.length} suitable room${L.length>1?'s':''} found.</p>`+(/block/i.test(q)?'<p class="t2" style="font-size:11px">Only one building is modelled.</p>':''):'<p class="m" style="font-size:12px">No room matches all requirements. Try fewer students or another floor.</p>')+L.map(x=>`<div class="res m" style="font-size:12px"><b>ROOM ${x.r.id}</b><br>Capacity ${x.r.cap}<br>${x.wait?'Available in '+x.wait+' min':'Available now'}<br>${x.d} m away<br><button class="b" style="margin-top:6px;min-height:34px" data-r="${x.r.id}">VIEW ON MAP</button></div>`).join('')}
+function sugg(q){q=q.trim().toLowerCase();const o=[];if(!q)return o;if(/next class/.test(q)){const n=nextCls();if(n)o.push({t:`Next class: ${n.name}`,s:`Room ${n.room} · ${f12(n.s)}`,r:byId(n.room)});return o}
+ if(/available|free|empty|students|people|near/.test(q))ai(q).forEach(x=>o.push({t:`ROOM ${x.r.id} — ${x.r.name}`,s:(x.wait?'Available in '+x.wait+' min':'Available now')+' · '+x.d+' m',r:x.r}));
+ const qq=q.replace(/^(room|lab)\s*/,'');ROOMS.forEach(r=>{if(o.length<6&&!o.some(z=>z.r==r)&&qq&&(r.id.toLowerCase().includes(qq)||r.name.toLowerCase().includes(q)))o.push({t:`ROOM ${r.id} — ${r.name}`,s:`Floor ${r.f||'G'} · ${LB[st(r).k]}`,r})});return o.slice(0,6)}
+let SG=[];function sgr(){const q=$('#q').value;SG=sugg(q);const b=$('#sg');b.style.display=SG.length?'block':'none';b.innerHTML=SG.map((s,i)=>`<button role="option" data-i="${i}"><b class="m">${esc(s.t)}</b><br><span class="t2">${esc(s.s)}</span></button>`).join('')}
+const wa=t=>window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank','noopener');
+function squadUI(){SQ.forEach(o=>o.visible=squad);const e=$('#sqp');if(!squad){e.innerHTML='';return}e.innerHTML=SQD.map(p=>`<div class="m" style="margin:8px 0;font-size:12px">${p.n}<br><span class="t2">● ${Math.round(Math.hypot(p.x-UP.x,p.z-UP.z)*1.2+Math.abs(p.f-UF)*8)} m away · floor ${p.f}</span></div>`).join('')+'<p class="t2" style="font-size:11px">Demo positions — live location needs a backend.</p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="b" data-a="meet">MEET HERE</button><button class="b" data-a="share">SHARE LOCATION</button><button class="b" data-a="inv">INVITE</button></div>'}
+function tick(){const s=secs();document.querySelectorAll('[data-u]').forEach(e=>{const r=Math.max(0,Math.floor(+e.dataset.u-s)),t=[Math.floor(r/3600),Math.floor(r%3600/60),r%60].map(v=>String(v).padStart(2,'0')).join(':');const c=e.previousElementSibling;if(c&&c.id=='rcd')c.textContent=t});
+ const n=nextCls();$('#ncn').textContent=n?n.name:'No more classes today';$('#ncr').textContent=n?'Room '+n.room:'';$('#ncg').style.display=n?'':'none';if(n){const r=Math.max(0,Math.floor(n.s*60-s));$('#cdn').textContent=[Math.floor(r/3600),Math.floor(r%3600/60),r%60].map(v=>String(v).padStart(2,'0')).join(':')}else $('#cdn').textContent='--:--:--'}
+let lm=-1;function refresh(){loadSTU();RD.forEach(d=>{const s=st(d.r);d.mat.emissive.setHex(CL[s.k]);drw(d.sp,[d.r.id,SH[s.k]])});chips();today();if(sel)panel()}
+setInterval(()=>{const m=MIN();if(m!=lm&&RD.length){lm=m;refresh()}tick()},1000);
+// ===== EVENTS =====
+$('#ex').onclick=()=>{mode='app';layout();setView('3d');cg.az=-.6;$('#hero').style.opacity=0;$('#hero').style.pointerEvents='none';const u=$('#ui');u.style.opacity=1;u.style.pointerEvents='auto';fsr();refresh()};
+$('#fr').onclick=()=>{$('#ex').click();setTimeout(()=>$('#q').focus(),300)};
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b){$('#sg').style.display='none';return}const a=b.dataset.a;
+ if(b.dataset.f){b.dataset.f=='ROOF'?(mode='stack',sel=null,$('#rp').hidden=true,clearRoute(),layout(),cg.d=34,cg.el=.5,fsr()):(cg.d=Math.max(cg.d,24),setFloor(b.dataset.f=='G'?0:+b.dataset.f))}
+ else if(b.dataset.v){if(mode!='app'){mode='app';layout();fsr()}setView(b.dataset.v)}else if(b.dataset.z)cg.d=Math.max(6,Math.min(42,cg.d*(b.dataset.z>0?1.25:.8)));
+ else if(b.id=='rs'){cg.az=-.6;cg.tx=cg.tz=0;setView('3d')}else if(b.dataset.r){const r=byId(b.dataset.r);selectRoom(r,!!b.dataset.n)}
+ else if(b.dataset.i!=null){const s=SG[+b.dataset.i];$('#sg').style.display='none';$('#q').value='';selectRoom(s.r,true)}
+ else if(a=='x'){sel=null;$('#rp').hidden=true}else if(a=='nav')startNav(sel);else if(a=='cn')clearRoute();
+ else if(a=='book')toast('Booking backend not connected — use CALL THE SQUAD to meet there.');
+ else if(a=='det'){const l=(SESS[sel.id]||[]).filter(x=>x.d==DAY()).sort((x,y)=>x.s-y.s);$('#det').innerHTML=l.length?l.map(x=>`${f12(x.s)} ${esc(x.name)}`).join('<br>'):'No classes scheduled today.'}
+ else if(b.id=='sq'){squad=!squad;squadUI()}else if(a=='meet')sel?(toast('Meeting point set: ROOM '+sel.id),wa(`📍 Meet at Room ${sel.id} (floor ${sel.f||'G'}).`)):toast('Select a room first.');
+ else if(a=='share')wa(sel?`📍 I'm heading to Room ${sel.id}, floor ${sel.f||'G'}.`:'📍 Sharing my spot on campus.');else if(a=='inv')wa('Join me on Smart Floor Manager — find a free room fast! 🚀');
+ else if(b.id=='ncg'){const n=nextCls();if(n)selectRoom(byId(n.room),true)}else if(b.id=='live'){sim=null;$('#sim').value='';refresh()}
+ else if(b.id=='fab')$('#lp').classList.toggle('open');else if(b.dataset.t)toast({n:'Next: '+($('#ncn').textContent),p:'Signed in as Student (demo)',s:'Settings coming soon'}[b.dataset.t])});
+$('#q').oninput=sgr;$('#q').onkeydown=e=>{if(e.key=='Enter'&&SG[0]){$('#sg').style.display='none';selectRoom(SG[0].r,true);$('#q').blur()}};
+$('#ai').onkeydown=e=>{if(e.key=='Enter')aiRun(e.target.value)};
+$('#sim').onchange=e=>{if(e.target.value){const[h,m]=e.target.value.split(':');sim={b:h*3600+m*60,t:Date.now(),d:DAY()||1};lm=-1;refresh()}};
+addEventListener('keydown',e=>{if(e.key=='/'&&document.activeElement.tagName!='INPUT'){e.preventDefault();$('#q').focus()}if(e.key=='Escape'){sel=null;$('#rp').hidden=true;clearRoute();$('#sg').style.display='none'}});
+const AT=$('#att'),FR=$('#afr');let atab='dashboard';
+function showTab(t,r){const on=t=='att';if(on){if(r)atab=r;if(!FR.dataset.l||r){FR.src='attendance/index.html?embed#/'+atab;FR.dataset.l=1}}AT.hidden=!on;document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab==t));document.querySelectorAll('[data-att]').forEach(b=>b.setAttribute('aria-pressed',on&&b.dataset.att==atab))}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-tab],[data-att]');if(t)t.dataset.tab?showTab(t.dataset.tab):showTab('att',t.dataset.att)});
+$('#ha').onclick=()=>{$('#ex').click();showTab('att')};
+addEventListener('storage',e=>{if(e.key=='srm-att-prefs'&&RD.length)refresh()});
+const sc0=document.createElement('script');sc0.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+sc0.onload=()=>{boot();fsr();chips();today();tick();$('#ld').style.opacity=0;setTimeout(()=>$('#ld').remove(),500)};sc0.onerror=()=>{$('#ld').innerHTML='<div class="m">Couldn\'t load the 3D engine. Check your connection and reload.</div>'};document.head.appendChild(sc0);
+</script></body></html>
